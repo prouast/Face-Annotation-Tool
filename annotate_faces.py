@@ -47,7 +47,7 @@ class InteractiveViewer(object):
         self.nose_coords = None
         self.lmouth_coords = None
         self.rmouth_coords = None
-
+        
         self.image = cv2.imread(img_path)
         self.image = cv2.cvtColor(self.image, cv2.COLOR_BGR2RGB)
         self.clone = self.image.copy()
@@ -68,6 +68,7 @@ class InteractiveViewer(object):
 
         self.is_finished = False
         self.is_skipped = False
+        self.repeat = False
 
         self.States = enum(GET_RECT=1,
                            GET_LEYE=2,
@@ -83,7 +84,7 @@ class InteractiveViewer(object):
         self.image = self.clone.copy()
 
         cv2.rectangle(self.image, self.rect_coords[0], self.rect_coords[1],
-                      (0, 255, 0), 5)
+                      (0, 255, 0), 1)
         if self.leye_coords is not None:
             cv2.circle(self.image, self.leye_coords, 5, (255, 0, 0), -1)
         if self.reye_coords is not None:
@@ -128,35 +129,35 @@ class InteractiveViewer(object):
             self.leye_coords = (int(event.xdata), int(event.ydata))
             self.button_leye.label.set_text(
                 'Left Eye\n{}'.format(self.leye_coords))
-            self.redraw_annotations()
+            #self.redraw_annotations()
 
         elif self.curr_state == self.States.GET_REYE:
             self.reye_coords = (int(event.xdata), int(event.ydata))
             self.reye_coords = (int(event.xdata), int(event.ydata))
             self.button_reye.label.set_text(
                 'Right Eye\n{}'.format(self.reye_coords))
-            self.redraw_annotations()
+            #self.redraw_annotations()
 
         elif self.curr_state == self.States.GET_NOSE:
             self.nose_coords = (int(event.xdata), int(event.ydata))
             self.nose_coords = (int(event.xdata), int(event.ydata))
             self.button_nose.label.set_text(
                 'Nose\n{}'.format(self.nose_coords))
-            self.redraw_annotations()
+            #self.redraw_annotations()
 
         elif self.curr_state == self.States.GET_LMOUTH:
             self.lmouth_coords = (int(event.xdata), int(event.ydata))
             self.lmouth_coords = (int(event.xdata), int(event.ydata))
             self.button_lmouth.label.set_text(
                 'Left Mouth\n{}'.format(self.lmouth_coords))
-            self.redraw_annotations()
+            #self.redraw_annotations()
 
         elif self.curr_state == self.States.GET_RMOUTH:
             self.rmouth_coords = (int(event.xdata), int(event.ydata))
             self.rmouth_coords = (int(event.xdata), int(event.ydata))
             self.button_rmouth.label.set_text(
                 'Right Mouth\n{}'.format(self.rmouth_coords))
-            self.redraw_annotations()
+            #self.redraw_annotations()
 
 
     def on_release(self, event):
@@ -169,7 +170,7 @@ class InteractiveViewer(object):
             self.rect_coords[1] = (int(event.xdata), int(event.ydata))
 
             cv2.rectangle(self.image, self.rect_coords[0], self.rect_coords[1],
-                          (0, 255, 0), 5)
+                          (0, 255, 0), 1)
 
             self.button_rect.label.set_text('Rectangle\n({},{})'.format(
                 self.rect_coords[0], self.rect_coords[1]))
@@ -188,7 +189,7 @@ class InteractiveViewer(object):
             return
 
         self.rect_coords[1] = (int(event.xdata), int(event.ydata))
-        self.redraw_annotations()
+        #self.redraw_annotations()
 
 
     def connect(self):
@@ -229,49 +230,51 @@ class InteractiveViewer(object):
             self.is_finished = True
 
         elif event.inaxes == self.button_skip.ax:
-            self.is_skipped = True
+            #self.is_skipped = True
+            # Do another face
+            self.repeat = True
 
-        self.redraw_annotations()
+        #self.redraw_annotations()
         self.update_button_labels()
 
 
     def init_subplots(self):
         self.fig = plt.figure(os.path.basename(self.img_path))
 
-        self.im_ax = self.fig.add_subplot(1, 2, 1)
+        self.im_ax = self.fig.add_subplot(1, 5, (1, 4))
         self.im_ax.set_title('Input')
         self.im_ax.imshow(self.image, interpolation='nearest')
 
-        self.button_rect = Button(plt.axes([0.5, 0.8, 0.45, 0.09]),
+        self.button_rect = Button(plt.axes([0.8, 0.8, 0.15, 0.09]),
                                   'Rectangle ()')
         self.button_rect.on_clicked(self.button_event)
 
-        self.button_leye = Button(plt.axes([0.5, 0.7, 0.45, 0.09]),
+        self.button_leye = Button(plt.axes([0.8, 0.7, 0.15, 0.09]),
                                   'Left eye ()')
         self.button_leye.on_clicked(self.button_event)
 
-        self.button_reye = Button(plt.axes([0.5, 0.6, 0.45, 0.09]),
+        self.button_reye = Button(plt.axes([0.8, 0.6, 0.15, 0.09]),
                                   'Right eye ()')
         self.button_reye.on_clicked(self.button_event)
 
-        self.button_nose = Button(plt.axes([0.5, 0.5, 0.45, 0.09]),
+        self.button_nose = Button(plt.axes([0.8, 0.5, 0.15, 0.09]),
                                   'Nose ()')
         self.button_nose.on_clicked(self.button_event)
 
-        self.button_lmouth = Button(plt.axes([0.5, 0.4, 0.45, 0.09]),
+        self.button_lmouth = Button(plt.axes([0.8, 0.4, 0.15, 0.09]),
                                     'Left mouth ()')
         self.button_lmouth.on_clicked(self.button_event)
 
-        self.button_rmouth = Button(plt.axes([0.5, 0.3, 0.45, 0.09]),
+        self.button_rmouth = Button(plt.axes([0.8, 0.3, 0.15, 0.09]),
                                     'Right mouth ()')
         self.button_rmouth.on_clicked(self.button_event)
 
-        self.button_done = Button(plt.axes([0.5, 0.15, 0.45, 0.05]),
+        self.button_done = Button(plt.axes([0.8, 0.15, 0.15, 0.05]),
                                   'Done')
         self.button_done.on_clicked(self.button_event)
 
-        self.button_skip = Button(plt.axes([0.5, 0.09, 0.45, 0.05]),
-                                  'Skip')
+        self.button_skip = Button(plt.axes([0.8, 0.09, 0.15, 0.05]),
+                                  'Another')
         self.button_skip.on_clicked(self.button_event)
 
         self.update_button_labels()
@@ -292,26 +295,26 @@ class InteractiveViewer(object):
 
     def save_annotations(self):
         self.fill_default_coords()
-        f_winner.write('{0}\t{1}\t{2}\t{3}\t{4}\t{5}\t{6}\t{7}\t{8}\t{9}\t{10}\n'.format(
-                  self.img_path,
+        f_winner.write('{0},{1},{2},{3},{4},{5},{6},{7},{8},{9},{10},{11},{12},{13},{14},{15},{16}\n'.format(
+                  "0",os.path.basename(self.img_path),"1.0",
+                  self.rect_coords[0][0], self.rect_coords[0][1],
+                  self.rect_coords[1][0], self.rect_coords[1][1],
                   self.leye_coords[0], self.leye_coords[1],
                   self.reye_coords[0], self.reye_coords[1],
                   self.nose_coords[0], self.nose_coords[1],
                   self.lmouth_coords[0], self.lmouth_coords[1],
-                  self.rmouth_coords[0], self.rmouth_coords[1])) 
+                  self.rmouth_coords[0], self.rmouth_coords[1]))
+        f_winner.flush()
         print('{0},{1},{2},{3},{4},{5},{6},{7},{8}'
               ',{9},{10},{11},{12},{13},{14}'.format(
                   os.path.basename(self.img_path),
+                  self.rect_coords[0][0], self.rect_coords[0][1],
+                  self.rect_coords[1][0], self.rect_coords[1][1],
                   self.leye_coords[0], self.leye_coords[1],
                   self.reye_coords[0], self.reye_coords[1],
                   self.nose_coords[0], self.nose_coords[1],
                   self.lmouth_coords[0], self.lmouth_coords[1],
-                  self.rmouth_coords[0], self.rmouth_coords[1],
-                  self.rect_coords[0][0], self.rect_coords[0][1],
-                  self.rect_coords[1][0] -
-                  self.rect_coords[0][0] + 1,
-                  self.rect_coords[1][1] -
-                  self.rect_coords[0][1] + 1))
+                  self.rmouth_coords[0], self.rmouth_coords[1]))
 
 
     def run(self):
@@ -325,18 +328,25 @@ class InteractiveViewer(object):
             # Exit
             if (self.is_finished
                     or (self.key_pressed and self.key_event.key == 'q')
-                    or self.is_skipped):
+                    or self.is_skipped or self.repeat):
                 break
 
         plt.close()
-
+        self.save_annotations()
         if self.is_finished:
-            self.save_annotations()
             return 0 # finished normally
         elif self.is_skipped:
             return 0
+        elif self.repeat:
+            return 2
         else:
             return 1 # aborted (pressed 'q')
+
+import re
+def sorted_alphanumeric(data):
+    convert = lambda text: int(text) if text.isdigit() else text.lower()
+    alphanum_key = lambda key: [ convert(c) for c in re.split('([0-9]+)', key) ] 
+    return sorted(data, key=alphanum_key)
 
 
 def parse_arguments():
@@ -359,25 +369,30 @@ def parse_arguments():
 
 def main(args):
     if args.dirimgs is not None:
-        flist = sorted(os.listdir(args.dirimgs))
-        print('image_fname,leye_x,leye_y,reye_x,reye_y,nose_x,nose_y,'
-              'lmouth_x,lmouth_y,rmouth_x,rmouth_y,'
-              'rect_top_x,rect_top_y,rect_width,rect_height')
+        flist = sorted_alphanumeric(os.listdir(args.dirimgs))
+        #flist = sorted(os.listdir(args.dirimgs))
+        print('image_fname,rect_x0,rect_y0,rect_x1,rect_y1,leye_x,leye_y,reye_x,reye_y,nose_x,nose_y,'
+              'lmouth_x,lmouth_y,rmouth_x,rmouth_y,')
 
         for curr_file in flist:#[::len(flist) // args.nimgs][:args.nimgs]:
             img_path = os.path.join(args.dirimgs, curr_file)
-            viewer = InteractiveViewer(img_path)
-            if viewer.run() == 1:
-                #print('break at 366')
+            if "DS_Store" in img_path:
+                continue
+            done = False
+            ret = 0
+            while not done:
+                viewer = InteractiveViewer(img_path)
+                ret = viewer.run()
+                if ret != 2:
+                    done = True
+            if ret == 1:
                 break
             else:
-                #print('continue at 369')
                 continue
 
     elif args.img is not None:
-        print('image_fname,leye_x,leye_y,reye_x,reye_y,nose_x,nose_y,'
-              'lmouth_x,lmouth_y,rmouth_x,rmouth_y,'
-              'rect_top_x,rect_top_y,rect_width,rect_height')
+        print('image_fname,rect_x0,rect_y0,rect_x1,rect_y1,leye_x,leye_y,reye_x,reye_y,nose_x,nose_y,'
+              'lmouth_x,lmouth_y,rmouth_x,rmouth_y,')
 
         img_path = args.img
         viewer = InteractiveViewer(img_path)
@@ -385,6 +400,6 @@ def main(args):
 
 
 if __name__ == '__main__':
-    f_winner = open('landmark_output.txt', 'a')
+    f_winner = open('landmark_output.csv', 'a')
     main(parse_arguments())
     f_winner.close()
